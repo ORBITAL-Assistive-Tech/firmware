@@ -1,2 +1,15 @@
-/build
+# GitHub Actions runner (if you put it in your project directory)
+actions-runner/
+
+# Other common ignores
+*.log
+.env
+node_modules/
+__pycache__/
+*.pyc
+build/
+dist/
+
+# Specific
+
 sdkconfig
