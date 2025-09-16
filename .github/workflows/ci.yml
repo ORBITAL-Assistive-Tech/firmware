@@ -65,7 +65,13 @@ jobs:
     
     - name: Run pytest
       run: |
-        pytest --verbose --tb=short
+        # Check if any test files exist before running pytest
+        if find . -name "test_*.py" -o -name "*_test.py" | grep -q .; then
+          echo "Found test files, running pytest..."
+          pytest --verbose --tb=short
+        else
+          echo "No test files found (test_*.py or *_test.py), skipping pytest"
+        fi
         # Add --cov for coverage if pytest-cov is installed
         # pytest --cov=. --cov-report=xml --verbose
 
