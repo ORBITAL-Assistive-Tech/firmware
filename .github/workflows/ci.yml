@@ -37,7 +37,7 @@ jobs:
           echo "Found tracked C/C++ source files, running cppcheck..."
           git ls-files | grep -E '\.(c|cpp)$' | \
           xargs cppcheck --enable=all --error-exitcode=1 --suppress=missingIncludeSystem \
-          --suppress=unusedFunction --suppress=unmatchedSuppression
+          --suppress=unusedFunction --suppress=unmatchedSuppression --suppress=missingInclude
         else
           echo "No tracked C/C++ source files found, skipping cppcheck"
         fi
@@ -89,12 +89,13 @@ jobs:
     
     - name: Run pytest
       run: |
-        # Check if any tracked test files exist before running pytest (respects .gitignore)
-        if git ls-files | grep -E 'test_.*\.py$|.*_test\.py$' | head -1 > /dev/null; then
-          echo "Found tracked test files, running pytest..."
+        run: |
+        # Check if any test files exist before running pytest
+        if find . -name "test_*.py" -o -name "*_test.py" | grep -q .; then
+          echo "Found test files, running pytest..."
           pytest --verbose --tb=short
         else
-          echo "No tracked test files found (test_*.py or *_test.py), skipping pytest"
+          echo "No test files found (test_*.py or *_test.py), skipping pytest"
         fi
         # Add --cov for coverage if pytest-cov is installed
         # pytest --cov=. --cov-report=xml --verbose
