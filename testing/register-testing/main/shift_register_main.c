@@ -53,21 +53,22 @@ void app_main(void) {
   configure();
   gpio_set_level(UE, HIGH);
 
-  uint64_t data_number = 6148914691236517205;
+  char data[8] = {0b0,        0b11110000, 0b11110000, 0b11110000,
+                  0b11110000, 0b11110000, 0b11110000, 0b11110000};
 
   while (1) {
-    for (int i = 0; i < MAX_DATA; i++) {
-      SET_SER((data_number & 1) >> i);
-      SET_SRCLK(HIGH);
-      vTaskDelay(CLOCK_DELAY / portTICK_PERIOD_MS);
-      SET_SRCLK(LOW);
-      vTaskDelay(CLOCK_DELAY / portTICK_PERIOD_MS);
+    for (int i = 0; i < MAX_DATA / 8; i++) {
+      for (int j = 0; j < MAX_DATA / 8; j++) {
+        SET_SER((data[i] >> j) & 1);
+        SET_SRCLK(LOW);
+        vTaskDelay(CLOCK_DELAY / portTICK_PERIOD_MS);
+        SET_SRCLK(HIGH);
+        vTaskDelay(CLOCK_DELAY / portTICK_PERIOD_MS);
+      }
     }
 
-    SET_SRCLK(HIGH);
     SET_RCLK(HIGH);
     vTaskDelay(CLOCK_DELAY / portTICK_PERIOD_MS);
-    SET_SRCLK(LOW);
     SET_RCLK(LOW);
   }
 }
