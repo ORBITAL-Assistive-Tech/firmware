@@ -52,16 +52,12 @@ static void configure(void) {
 void app_main(void) {
   configure();
   gpio_set_level(UE, HIGH);
-  uint8_t data[MAX_DATA] = {
-      0b1, 0b0, 0b1, 0b0, 0b1, 0b0, 0b1, 0b0, 0b1, 0b0, 0b1, 0b0, 0b1,
-      0b0, 0b1, 0b0, 0b1, 0b0, 0b1, 0b0, 0b1, 0b0, 0b1, 0b0, 0b1, 0b0,
-      0b1, 0b0, 0b1, 0b0, 0b1, 0b0, 0b1, 0b0, 0b1, 0b0, 0b1, 0b0, 0b1,
-      0b0, 0b1, 0b0, 0b1, 0b0, 0b1, 0b0, 0b1, 0b0, 0b1, 0b0, 0b1, 0b0,
-      0b1, 0b0, 0b1, 0b0, 0b1, 0b0, 0b1, 0b0, 0b1, 0b0, 0b1, 0b0};
+
+  uint64_t data_number = 6148914691236517205;
 
   while (1) {
     for (int i = 0; i < MAX_DATA; i++) {
-      SET_SER(data[i]);
+      SET_SER((data_number & 1) >> i);
       SET_SRCLK(HIGH);
       vTaskDelay(CLOCK_DELAY / portTICK_PERIOD_MS);
       SET_SRCLK(LOW);
