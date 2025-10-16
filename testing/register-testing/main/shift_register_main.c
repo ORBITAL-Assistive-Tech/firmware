@@ -10,20 +10,17 @@
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "led_strip.h"
 #include "sdkconfig.h"
 #include <stdio.h>
-
-static const char *TAG = "example";
 
 /* Use project configuration menu (idf.py menuconfig) to choose the GPIO to
    blink, or you can edit the following line and set a number here.
 */
 #define BLINK_GPIO CONFIG_BLINK_GPIO
-#define SER 26   // Data In
-#define UE 27    // ENABLE
-#define RCLK 14  // Main Clock - Toggle when all the bits have been pushed
-#define SRCLK 12 // Second Clock - Always on
+#define SER 36   // Data In
+#define UE 37    // ENABLE
+#define RCLK 38  // Main Clock - Toggle when all the bits have been pushed
+#define SRCLK 39 // Second Clock - Always on
 
 #define SET_SER(level) gpio_set_level(SER, level)
 #define SET_SRCLK(level) gpio_set_level(SRCLK, level)
