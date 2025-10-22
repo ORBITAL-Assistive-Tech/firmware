@@ -10,9 +10,12 @@
 
 #include "driver/sdmmc_host.h"
 #include "esp_vfs_fat.h"
+#include "sd_card_methods.h"
 #include "sd_test_io.h"
 #include "sdkconfig.h"
 #include "sdmmc_cmd.h"
+#include "shift_register.h"
+#include "utils.h"
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/unistd.h>
@@ -20,7 +23,8 @@
 #include "sd_pwr_ctrl_by_on_chip_ldo.h"
 #endif
 
-#define EXAMPLE_MAX_CHAR_SIZE 64
+#define EXAMPLE_MAX_CHAR_SIZE 8
+#define MAX_DATA 64
 
 static const char *TAG = "example";
 
@@ -28,41 +32,6 @@ static const char *TAG = "example";
 #define EXAMPLE_IS_UHS1                                                        \
   (CONFIG_EXAMPLE_SDMMC_SPEED_UHS_I_SDR50 ||                                   \
    CONFIG_EXAMPLE_SDMMC_SPEED_UHS_I_DDR50)
-
-static esp_err_t s_example_write_file(const char *path, char *data) {
-  ESP_LOGI(TAG, "Opening file %s", path);
-  FILE *f = fopen(path, "w");
-  if (f == NULL) {
-    ESP_LOGE(TAG, "Failed to open file for writing");
-    return ESP_FAIL;
-  }
-  fprintf(f, data);
-  fclose(f);
-  ESP_LOGI(TAG, "File written");
-
-  return ESP_OK;
-}
-
-static esp_err_t s_example_read_file(const char *path) {
-  ESP_LOGI(TAG, "Reading file %s", path);
-  FILE *f = fopen(path, "r");
-  if (f == NULL) {
-    ESP_LOGE(TAG, "Failed to open file for reading");
-    return ESP_FAIL;
-  }
-  char line[EXAMPLE_MAX_CHAR_SIZE];
-  fgets(line, sizeof(line), f);
-  fclose(f);
-
-  // strip newline
-  char *pos = strchr(line, '\n');
-  if (pos) {
-    *pos = '\0';
-  }
-  ESP_LOGI(TAG, "Read from file: '%s'", line);
-
-  return ESP_OK;
-}
 
 void app_main(void) {
   esp_err_t ret;
@@ -74,9 +43,6 @@ void app_main(void) {
       .max_files = 5, .allocation_unit_size = 16 * 1024};
   sdmmc_card_t *card;
   const char mount_point[] = MOUNT_POINT;
-  ESP_LOGI(TAG, "Initializing SD card");
-
-  ESP_LOGI(TAG, "Using SDMMC peripheral");
 
   // By default, SD card frequency is initialized to SDMMC_FREQ_DEFAULT (20MHz)
   // For setting a specific frequency, use host.max_freq_khz (range 400kHz -
@@ -101,19 +67,11 @@ void app_main(void) {
   slot_config.d2 = CONFIG_EXAMPLE_PIN_D2;
   slot_config.d3 = CONFIG_EXAMPLE_PIN_D3;
 
-  const char *names[] = {"CLK", "CMD", "D0", "D1", "D2", "D3"};
-  const int pins[] = {CONFIG_EXAMPLE_PIN_CLK, CONFIG_EXAMPLE_PIN_CMD,
-                      CONFIG_EXAMPLE_PIN_D0};
-  pin_configuration_t pin_config = {.names = names, .pins = pins};
-
-  check_sd_card_pins(&pin_config, 3);
-
   // Enable internal pullups on enabled pins. The internal pullups
   // are insufficient however, please make sure 10k external pullups are
   // connected on the bus. This is for debug / example purpose only.
   slot_config.flags |= SDMMC_SLOT_FLAG_INTERNAL_PULLUP;
 
-  ESP_LOGI(TAG, "Mounting filesystem");
   ret = esp_vfs_fat_sdmmc_mount(mount_point, &host, &slot_config, &mount_config,
                                 &card);
 
@@ -135,50 +93,25 @@ void app_main(void) {
   // Card has been initialized, print its properties
   sdmmc_card_print_info(stdout, card);
 
-  // First create a file.
-  const char *file_hello = MOUNT_POINT "/hello.txt";
-  char data[EXAMPLE_MAX_CHAR_SIZE];
-  snprintf(data, EXAMPLE_MAX_CHAR_SIZE, "%s %s!\n", "Hello", card->cid.name);
-  ret = s_example_write_file(file_hello, data);
+  const char *file = MOUNT_POINT "/hello.brf";
+  uint8_t braille_data[EXAMPLE_MAX_CHAR_SIZE - 1];
+  ret = sd_read_file(file, braille_data, EXAMPLE_MAX_CHAR_SIZE);
+
+  // read text data and convert it to braille format, then take the uint8_t
+  // array and push it to shift register
   if (ret != ESP_OK) {
+    ESP_LOGI(TAG, "heyy...this aint working");
     return;
   }
-
-  const char *file_foo = MOUNT_POINT "/foo.txt";
-  // Check if destination file exists before renaming
-  struct stat st;
-  if (stat(file_foo, &st) == 0) {
-    // Delete it if it exists
-    unlink(file_foo);
-  }
-
-  // Rename original file
-  ESP_LOGI(TAG, "Renaming file %s to %s", file_hello, file_foo);
-  if (rename(file_hello, file_foo) != 0) {
-    ESP_LOGE(TAG, "Rename failed");
-    return;
-  }
-
-  ret = s_example_read_file(file_foo);
-  if (ret != ESP_OK) {
-    return;
-  }
-
-  const char *file_nihao = MOUNT_POINT "/nihao.txt";
-  memset(data, 0, EXAMPLE_MAX_CHAR_SIZE);
-  snprintf(data, EXAMPLE_MAX_CHAR_SIZE, "%s %s!\n", "Nihao", card->cid.name);
-  ret = s_example_write_file(file_nihao, data);
-  if (ret != ESP_OK) {
-    return;
-  }
-
-  // Open file for reading
-  ret = s_example_read_file(file_nihao);
-  if (ret != ESP_OK) {
-    return;
-  }
-
   // All done, unmount partition and disable SDMMC peripheral
   esp_vfs_fat_sdcard_unmount(mount_point, card);
-  ESP_LOGI(TAG, "Card unmounted");
+  ESP_LOGI(TAG, "Unmounted");
+
+  configure();
+  gpio_set_level(UE, LOW);
+
+  while (1) {
+    push_to_shift_register(EXAMPLE_MAX_CHAR_SIZE - 2, braille_data);
+    vTaskDelay(pdMS_TO_TICKS(500));
+  }
 }
