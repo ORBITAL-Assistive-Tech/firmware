@@ -1,7 +1,7 @@
 #include "utils.h"
 #include <stdint.h>
 
-uint8_t ascii_braille_conversion[64] = {
+const uint8_t ascii_braille_conversion[64] = {
     0b000000, 0b011101, 0b000010, 0b001111, 0b110101, 0b100101, 0b111101,
     0b001000, 0b111011, 0b011111, 0b100001, 0b001101, 0b000001, 0b001001,
     0b000101, 0b001100, 0b001011, 0b010000, 0b011000, 0b010010, 0b010011,

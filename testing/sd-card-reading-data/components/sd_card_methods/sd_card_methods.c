@@ -31,7 +31,7 @@ esp_err_t sd_write_file(const char *path, uint8_t data[], size_t data_len) {
   }
 
   for (size_t i = 0; i < data_len; i++) {
-    const uint8_t character = ascii_to_brf_conversion[BRAILLE_OFFSET(data[i])];
+    const uint8_t character = ascii_braille_conversion[BRAILLE_OFFSET(data[i])];
     fprintf(f, "%c", (const char)character);
   }
   fprintf(f, "\n");
@@ -59,7 +59,8 @@ esp_err_t sd_read_file(const char *path, uint8_t dst[], size_t dst_len) {
   }
 
   for (size_t i = 0; i < sizeof(line); i++) {
-    dst[i] = (uint8_t)line[i];
+    dst[i] = ascii_braille_conversion[BRAILLE_OFFSET(line[i])]; // (uint8_t)
+                                                                // line[i];
   }
   ESP_LOGI(TAG, "Read from file: '%s'", line);
 

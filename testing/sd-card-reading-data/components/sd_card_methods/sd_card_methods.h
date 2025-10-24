@@ -1,11 +1,5 @@
 #pragma once
 #include "driver/sdmmc_host.h"
-#include "esp_log.h"
-#include "esp_vfs_fat.h"
-#include "sd_card_methods.h"
-#include "sdkconfig.h"
-#include "sdmmc_cmd.h"
-#include "utils.h"
 #include <stdint.h>
 #include <string.h>
 #include <sys/stat.h>

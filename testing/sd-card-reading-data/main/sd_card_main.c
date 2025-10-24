@@ -26,7 +26,7 @@
 #define EXAMPLE_MAX_CHAR_SIZE 8
 #define MAX_DATA 64
 
-static const char *TAG = "example";
+static const char *TAG = "main";
 
 #define MOUNT_POINT "/sdcard"
 #define EXAMPLE_IS_UHS1                                                        \
@@ -94,7 +94,7 @@ void app_main(void) {
   sdmmc_card_print_info(stdout, card);
 
   const char *file = MOUNT_POINT "/hello.brf";
-  uint8_t braille_data[EXAMPLE_MAX_CHAR_SIZE - 1];
+  uint8_t braille_data[EXAMPLE_MAX_CHAR_SIZE];
   ret = sd_read_file(file, braille_data, EXAMPLE_MAX_CHAR_SIZE);
 
   // read text data and convert it to braille format, then take the uint8_t
@@ -106,12 +106,13 @@ void app_main(void) {
   // All done, unmount partition and disable SDMMC peripheral
   esp_vfs_fat_sdcard_unmount(mount_point, card);
   ESP_LOGI(TAG, "Unmounted");
+  // HELL06 -> hello!
 
   configure();
-  gpio_set_level(UE, LOW);
+  SET_UE(LOW);
 
   while (1) {
-    push_to_shift_register(EXAMPLE_MAX_CHAR_SIZE - 2, braille_data);
-    vTaskDelay(pdMS_TO_TICKS(500));
+    push_to_shift_register(EXAMPLE_MAX_CHAR_SIZE - 1, braille_data);
+    vTaskDelay(pdMS_TO_TICKS(10000));
   }
 }
