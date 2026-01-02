@@ -1,7 +1,10 @@
 #pragma once
 
-#include <stdint.h>
+#include <concepts>
+#include <cstdint>
 
-#define BRAILLE_OFFSET(index) index - 0x20
+template <std::integral T> inline T braille_offset(const T index) {
+  return index - 0x20;
+}
 
-extern const uint8_t ascii_braille_conversion[64];
+extern const std::uint8_t ascii_braille_conversion[64];
