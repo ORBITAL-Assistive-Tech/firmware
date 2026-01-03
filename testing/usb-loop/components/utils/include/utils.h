@@ -1,7 +1,11 @@
 #pragma once
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include <concepts>
 #include <cstdint>
+
+inline void sleep_ms(int millis) { vTaskDelay(pdMS_TO_TICKS(millis)); }
 
 template <std::integral T> inline T braille_offset(const T index) {
   return index - 0x20;

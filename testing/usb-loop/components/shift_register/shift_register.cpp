@@ -1,27 +1,30 @@
 #include "shift_register.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
+
+#include "esp_err.h"
+#include "esp_log.h"
+
 #include <cstdint>
 
 static const char *tag = "shift_register";
 
-void push_to_shift_register(std::size_t data_size, std::uint8_t data[]) {
-  for (int i = MAX_BYTES / SIZEOF_BYTE - 1; i >= 0; i--) {
-    for (std::size_t j = 0; j < MAX_BYTES / SIZEOF_BYTE; j++) {
-      if (i < data_size) {
-        set_ser((((data[i] >> j) & 1) == 1) ? HIGH : LOW);
-      } else {
-        set_ser(LOW);
+bool ShiftRegister::is_on = false;
+
+esp_err_t ShiftRegister::push(std::uint8_t data[], std::size_t data_size) {
+  if (ShiftRegister::is_on) {
+    for (int i = MAX_BYTES / SIZEOF_BYTE - 1; i >= 0; i--) {
+      for (std::size_t j = 0; j < MAX_BYTES / SIZEOF_BYTE; j++) {
+        if (i < data_size) {
+          ShiftRegister::set_ser((((data[i] >> j) & 1) == 1) ? HIGH : LOW);
+        } else {
+          ShiftRegister::set_ser(LOW);
+        }
+        srclk();
       }
-
-      set_srclk(LOW);
-      vTaskDelay(CLOCK_DELAY / portTICK_PERIOD_MS);
-      set_srclk(HIGH);
-      vTaskDelay(CLOCK_DELAY / portTICK_PERIOD_MS);
     }
+    rclk();
+    return ESP_OK;
+  } else {
+    ESP_LOGE(tag, "Configure your shift register before you use it!");
+    return ESP_FAIL;
   }
-
-  set_rclk(HIGH);
-  vTaskDelay(CLOCK_DELAY / portTICK_PERIOD_MS);
-  set_rclk(LOW);
 }

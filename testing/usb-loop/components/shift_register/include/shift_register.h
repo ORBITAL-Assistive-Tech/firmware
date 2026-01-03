@@ -1,7 +1,9 @@
 #pragma once
 
 #include "driver/gpio.h"
+#include "esp_err.h"
 #include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include <cstdint>
 
 constexpr gpio_num_t SER = GPIO_NUM_14;   // data in
@@ -13,30 +15,59 @@ constexpr std::size_t MAX_BYTES = 64; // max amount of data available to show
 constexpr std::size_t SIZEOF_BYTE = 8;
 
 typedef enum {
-  LOW = 0,
-  HIGH = 1,
+  LOW = static_cast<std::uint32_t>(0),
+  HIGH = static_cast<std::uint32_t>(1),
 } level_t;
 
-inline void set_ser(level_t level) { gpio_set_level(SER, level); }
+class ShiftRegister {
+public:
+  static inline void configure() {
+    gpio_reset_pin(SER);
+    gpio_reset_pin(OE);
+    gpio_reset_pin(RCLK);
+    gpio_reset_pin(SRCLK);
 
-inline void set_srclk(level_t level) { gpio_set_level(SRCLK, level); }
+    gpio_set_direction(SER, GPIO_MODE_OUTPUT);
+    gpio_set_direction(OE, GPIO_MODE_OUTPUT);
+    gpio_set_direction(RCLK, GPIO_MODE_OUTPUT);
+    gpio_set_direction(SRCLK, GPIO_MODE_OUTPUT);
+  }
 
-inline void set_rclk(level_t level) { gpio_set_level(RCLK, level); }
+  static esp_err_t push(std::uint8_t data[], std::size_t data_size);
 
-inline void set_oe(level_t level) { gpio_set_level(OE, level); }
+  static inline void turn_on() {
+    gpio_set_level(OE, HIGH);
+    is_on = true;
+  }
 
-#define CLOCK_DELAY static_cast<TickType_t>(1)
+  static inline void turn_off() {
+    gpio_set_level(OE, LOW);
+    is_on = false;
+  }
 
-inline void shift_register_configure() {
-  gpio_reset_pin(SER);
-  gpio_reset_pin(OE);
-  gpio_reset_pin(RCLK);
-  gpio_reset_pin(SRCLK);
+private:
+  static bool is_on;
 
-  gpio_set_direction(SER, GPIO_MODE_OUTPUT);
-  gpio_set_direction(OE, GPIO_MODE_OUTPUT);
-  gpio_set_direction(RCLK, GPIO_MODE_OUTPUT);
-  gpio_set_direction(SRCLK, GPIO_MODE_OUTPUT);
-}
+  static inline void set_ser(level_t level) { gpio_set_level(SER, level); }
 
-void push_to_shift_register(std::size_t data_size, std::uint8_t data[]);
+  static inline void set_srclk(level_t level) { gpio_set_level(SRCLK, level); }
+
+  static inline void set_rclk(level_t level) { gpio_set_level(RCLK, level); }
+
+  static inline void clock() {
+    vTaskDelay(static_cast<TickType_t>(1) / portTICK_PERIOD_MS);
+  }
+
+  static inline void rclk() {
+    set_rclk(HIGH);
+    clock();
+    set_rclk(LOW);
+  }
+
+  static inline void srclk() {
+    set_srclk(LOW);
+    clock();
+    set_srclk(HIGH);
+    clock();
+  }
+};

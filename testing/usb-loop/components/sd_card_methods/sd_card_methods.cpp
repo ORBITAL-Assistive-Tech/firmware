@@ -1,6 +1,7 @@
 #include "sd_card_methods.h"
 #include "driver/sdmmc_default_configs.h"
 #include "driver/sdmmc_host.h"
+#include "esp_err.h"
 #include "esp_log.h"
 #include "esp_vfs_fat.h"
 #include "sdmmc_cmd.h"
@@ -15,8 +16,8 @@ static const char *tag = "sd_card_methods";
 sdmmc_card_t *SD::card = nullptr;
 const SDInfo SD::sd_info = SDInfo();
 
-esp_err_t SD::sd_write_file(const std::string &path, std::uint8_t data[],
-                            std::size_t data_len) {
+esp_err_t SD::write_file(const std::string &path, std::uint8_t data[],
+                         std::size_t data_len) {
   ESP_LOGI(tag, "Opening file %s", path.c_str());
   std::ofstream file;
   file.open(path);
@@ -36,8 +37,8 @@ esp_err_t SD::sd_write_file(const std::string &path, std::uint8_t data[],
   return ESP_OK;
 }
 
-esp_err_t SD::sd_read_file(const std::string &path, std::uint8_t dst[],
-                           std::size_t dst_len) {
+esp_err_t SD::read_file(const std::string &path, std::uint8_t dst[],
+                        std::size_t dst_len) {
   ESP_LOGI(tag, "Reading file %s", path.c_str());
   std::ifstream file;
   file.open(path);

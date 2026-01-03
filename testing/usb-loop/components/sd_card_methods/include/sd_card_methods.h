@@ -3,6 +3,7 @@
 #include "driver/gpio.h"
 #include "driver/sdmmc_default_configs.h"
 #include "driver/sdmmc_host.h"
+#include "esp_err.h"
 #include "esp_vfs_fat.h"
 #include <cstdint>
 #include <string>
@@ -25,9 +26,13 @@ constexpr std::size_t MAX_LINE_SIZE = 8;
 class SDInfo {
 public:
   static constexpr const char *mount_point = "/sdcard";
+
   esp_vfs_fat_sdmmc_mount_config_t mount_config;
+
   sdmmc_host_t host;
+
   sdmmc_slot_config_t slot_config;
+
   SDInfo()
       : mount_config{.format_if_mount_failed = false,
                      .max_files = 5,
@@ -55,15 +60,23 @@ public:
 class SD {
 public:
   static sdmmc_card_t *card;
+
   static const SDInfo sd_info;
+
   static bool is_mounted;
-  static esp_err_t sd_write_file(const std::string &path, std::uint8_t data[],
-                                 std::size_t data_len);
-  static esp_err_t sd_read_file(const std::string &path, std::uint8_t dst[],
-                                std::size_t dst_len);
+
+  static esp_err_t write_file(const std::string &path, std::uint8_t data[],
+                              std::size_t data_len);
+
+  static esp_err_t read_file(const std::string &path, std::uint8_t dst[],
+                             std::size_t dst_len);
+
   static esp_err_t mount();
+
   static void unmount();
+
   static void print_info();
+
   static inline std::string to_path(const char *file_path) {
     return std::string(SDInfo::mount_point).append(file_path);
   }
