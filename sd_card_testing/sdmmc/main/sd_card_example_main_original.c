@@ -69,24 +69,24 @@ const int pins[] = {CONFIG_EXAMPLE_PIN_CLK,
 
 const int pin_count = sizeof(pins)/sizeof(pins[0]);
 
-#if CONFIG_EXAMPLE_ENABLE_ADC_FEATURE
-const int adc_channels[] = {CONFIG_EXAMPLE_ADC_PIN_CLK,
-                            CONFIG_EXAMPLE_ADC_PIN_CMD,
-                            CONFIG_EXAMPLE_ADC_PIN_D0
-                            #ifdef CONFIG_EXAMPLE_SDMMC_BUS_WIDTH_4
-                            ,CONFIG_EXAMPLE_ADC_PIN_D1,
-                            CONFIG_EXAMPLE_ADC_PIN_D2,
-                            CONFIG_EXAMPLE_ADC_PIN_D3
-                            #endif
-                            };
-#endif //CONFIG_EXAMPLE_ENABLE_ADC_FEATURE
+// #if CONFIG_EXAMPLE_ENABLE_ADC_FEATURE
+// const int adc_channels[] = {CONFIG_EXAMPLE_ADC_PIN_CLK,
+//                             CONFIG_EXAMPLE_ADC_PIN_CMD,
+//                             CONFIG_EXAMPLE_ADC_PIN_D0
+//                             #ifdef CONFIG_EXAMPLE_SDMMC_BUS_WIDTH_4
+//                             ,CONFIG_EXAMPLE_ADC_PIN_D1,
+//                             CONFIG_EXAMPLE_ADC_PIN_D2,
+//                             CONFIG_EXAMPLE_ADC_PIN_D3
+//                             #endif
+//                             };
+// #endif //CONFIG_EXAMPLE_ENABLE_ADC_FEATURE
 
 pin_configuration_t config = {
     .names = names,
     .pins = pins,
-#if CONFIG_EXAMPLE_ENABLE_ADC_FEATURE
-    .adc_channels = adc_channels,
-#endif
+// #if CONFIG_EXAMPLE_ENABLE_ADC_FEATURE
+//     .adc_channels = adc_channels,
+// #endif
 };
 #endif //CONFIG_EXAMPLE_DEBUG_PIN_CONNECTIONS
 
@@ -172,19 +172,19 @@ void app_main(void)
     // For SoCs where the SD power can be supplied both via an internal or external (e.g. on-board LDO) power supply.
     // When using specific IO pins (which can be used for ultra high-speed SDMMC) to connect to the SD card
     // and the internal LDO power supply, we need to initialize the power supply first.
-#if CONFIG_EXAMPLE_SD_PWR_CTRL_LDO_INTERNAL_IO
-    sd_pwr_ctrl_ldo_config_t ldo_config = {
-        .ldo_chan_id = CONFIG_EXAMPLE_SD_PWR_CTRL_LDO_IO_ID,
-    };
-    sd_pwr_ctrl_handle_t pwr_ctrl_handle = NULL;
+// #if CONFIG_EXAMPLE_SD_PWR_CTRL_LDO_INTERNAL_IO
+//     sd_pwr_ctrl_ldo_config_t ldo_config = {
+//         .ldo_chan_id = CONFIG_EXAMPLE_SD_PWR_CTRL_LDO_IO_ID,
+//     };
+//     sd_pwr_ctrl_handle_t pwr_ctrl_handle = NULL;
 
-    ret = sd_pwr_ctrl_new_on_chip_ldo(&ldo_config, &pwr_ctrl_handle);
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to create a new on-chip LDO power control driver");
-        return;
-    }
-    host.pwr_ctrl_handle = pwr_ctrl_handle;
-#endif
+//     ret = sd_pwr_ctrl_new_on_chip_ldo(&ldo_config, &pwr_ctrl_handle);
+//     if (ret != ESP_OK) {
+//         ESP_LOGE(TAG, "Failed to create a new on-chip LDO power control driver");
+//         return;
+//     }
+//     host.pwr_ctrl_handle = pwr_ctrl_handle;
+// #endif
 
     // This initializes the slot without card detect (CD) and write protect (WP) signals.
     // Modify slot_config.gpio_cd and slot_config.gpio_wp if your board has these signals.
@@ -313,11 +313,11 @@ void app_main(void)
     ESP_LOGI(TAG, "Card unmounted");
 
     // Deinitialize the power control driver if it was used
-#if CONFIG_EXAMPLE_SD_PWR_CTRL_LDO_INTERNAL_IO
-    ret = sd_pwr_ctrl_del_on_chip_ldo(pwr_ctrl_handle);
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to delete the on-chip LDO power control driver");
-        return;
-    }
-#endif
+// #if CONFIG_EXAMPLE_SD_PWR_CTRL_LDO_INTERNAL_IO
+//     ret = sd_pwr_ctrl_del_on_chip_ldo(pwr_ctrl_handle);
+//     if (ret != ESP_OK) {
+//         ESP_LOGE(TAG, "Failed to delete the on-chip LDO power control driver");
+//         return;
+//     }
+// #endif
 }
