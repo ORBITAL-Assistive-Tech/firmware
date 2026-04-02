@@ -22,11 +22,7 @@ static void configure_led(void)
     gpio_set_level(GPIO_NUM_42,0);
 }
 
-uint8_t convert_character(uint8_t input) {
-    return conversion_table[input-32];
-}
-
-uint8_t conversion_table[] = {
+static uint8_t conversion_table[] = {
     0b00000000, 0b00011101, 0b00000010, 0b00001111, 0b00110101, 0b00100101, 0b00111101, 0b00001000,
     0b00111011, 0b00011111, 0b00100001, 0b00001101, 0b00000001, 0b00001001, 0b00000101, 0b00001100,
     0b00001011, 0b00010000, 0b00011000, 0b00010010, 0b00010011, 0b00010001, 0b00011010, 0b00011011,
@@ -36,6 +32,22 @@ uint8_t conversion_table[] = {
     0b00111100, 0b00111110, 0b00111010, 0b00011100, 0b00011110, 0b00101001, 0b00111001, 0b00010111,
     0b00101101, 0b00101111, 0b00101011, 0b00010101, 0b00000000, 0b00110111, 0b00000110, 0b00000111
 };
+
+uint8_t convert_character(uint8_t input);
+uint8_t convert_character(uint8_t input) {
+
+    uint8_t converted_input = conversion_table[input-0x20];
+
+    for(int i=5; i>=0; i--){
+        printf("%d", (converted_input>>i) & 1);
+    }
+
+    printf("\n");
+
+    // ESP_LOGI(TAG, "%d", conversion_table[input-32]);
+    return conversion_table[input-0x20];
+}
+
 
 /*
     " ": "000000"
@@ -106,27 +118,9 @@ uint8_t conversion_table[] = {
     
 */
 
-void display_string(char* input) {
 
-    size_t num_characters = strlen(input);
-    uint8_t characters[num_characters];
 
-    for(int i=0; i<num_characters; i++){
-        characters[i] = (uint8_t)input[i];
-    }
-
-    int i=0;
-    while(1){
-        if(i+8 > num_characters){
-            display_character_set(characters[i], num_characters - i);
-            i = 0;
-        } else {
-            display_character_set(characters[i], 8);
-            i += 8;
-        }
-    }
-}
-
+void display_character_set(uint8_t* characters, size_t num_characters);
 void display_character_set(uint8_t* characters, size_t num_characters) {
 
     int total_cells = 8;
@@ -146,38 +140,81 @@ void display_character_set(uint8_t* characters, size_t num_characters) {
     configure_led();
 
     for(int i=0; i<8; i++){
+
         uint8_t input = inputs[i];
+        // rclk off
+        gpio_set_level(GPIO_NUM_13, 0);
+
         for(int j=0; j<8; j++){
-            // pass the i*8+jth bit into shift register
+            // srclk off
+            gpio_set_level(GPIO_NUM_47, 0);
+
+            // pass the jth bit into shift register
             gpio_set_level(GPIO_NUM_14, (input>>j) & 1);
 
             esp_rom_delay_us(500);
+
             // srclk on
             gpio_set_level(GPIO_NUM_47, 1);
-            // delay
-            // vTaskDelay(pdMS_TO_TICKS(.5));
-            esp_rom_delay_us(500);
-            // srclk off
-            gpio_set_level(GPIO_NUM_47, 0);
+
             // delay
             esp_rom_delay_us(500);
+
+            // data pin 0?
+            gpio_set_level(GPIO_NUM_14, 0);
 
             // ESP_LOGI(TAG, "%d: %d", i*8+j, (input>>(i*8+j)) & 1);
         }
-    }
-    // rclk on
-    gpio_set_level(GPIO_NUM_13, 1);
-    // delay
-    esp_rom_delay_us(500);
-    // rclk off
-    gpio_set_level(GPIO_NUM_13, 0);
 
-    esp_rom_delay_us(1000000);
+        // rclk on
+        gpio_set_level(GPIO_NUM_13, 1);
+        // delay
+        esp_rom_delay_us(500);
+        
+    }
+    // // rclk on
+    // gpio_set_level(GPIO_NUM_13, 1);
+    // // delay
+    // esp_rom_delay_us(500);
+    // // rclk off
+    // gpio_set_level(GPIO_NUM_13, 0);
+
 
 }
 
+void display_string(char* input);
+void display_string(char* input) {
+
+    size_t num_characters = strlen(input);
+    uint8_t characters[num_characters];
+
+    for(int i=0; i<num_characters; i++){
+        characters[i] = (uint8_t)input[i];
+    }
+
+    int i=0;
+    while(1){
+        if(i+8 > num_characters){
+            display_character_set(characters + i, num_characters - i);
+            i = 0;
+        } else {
+            display_character_set(characters + i, 8);
+            i += 8;
+        }
+        // esp_rom_delay_us(1000000);
+        ESP_LOGI(TAG, "");
+        vTaskDelay(pdMS_TO_TICKS(1000));
+
+        uint8_t zeros[] = {32, 32, 32, 32, 32, 32, 32, 32};
+
+        display_character_set(zeros, 8);
+
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+}
+
 void app_main(void) {
-    display_string("hello");
+    display_string("HELLO!");
 }
 
 // while (1) {
