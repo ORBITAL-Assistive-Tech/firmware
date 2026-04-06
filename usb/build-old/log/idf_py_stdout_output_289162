@@ -1,0 +1,2 @@
+Command: /home/metal/.espressif/python_env/idf5.5_py3.14_env/bin/python /opt/esp-idf/tools/idf_monitor.py -p /dev/ttyACM1 -b 115200 --toolchain-prefix xtensa-esp32s3-elf- --target esp32s3 --revision 0 /home/metal/esp/usb/build/usb.elf /home/metal/esp/usb/build/bootloader/bootloader.elf -m '/home/metal/.espressif/python_env/idf5.5_py3.14_env/bin/python' '/opt/esp-idf/tools/idf.py' '-p' '/dev/ttyACM1'
+

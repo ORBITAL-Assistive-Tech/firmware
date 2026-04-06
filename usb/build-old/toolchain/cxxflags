@@ -1,0 +1,7 @@
+-fno-builtin-stpcpy
+-fno-builtin-strncpy
+-mlongcalls
+-fno-builtin-memcpy
+-fno-builtin-memset
+-fno-builtin-bzero
+-fno-rtti

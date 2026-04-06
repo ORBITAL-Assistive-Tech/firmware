@@ -1,0 +1,2 @@
+source /home/metal/esp/usb/build/bootloader/gdbinit/symbols
+source /home/metal/esp/usb/build/bootloader/gdbinit/connect
