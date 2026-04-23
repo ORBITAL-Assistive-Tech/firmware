@@ -1,3 +1,4 @@
 idf_component_register(SRCS "shift_registers_main.cpp"
                        INCLUDE_DIRS "."
-                       REQUIRES "display_string")
+                       REQUIRES "display_string"
+                       PRIV_REQUIRES driver)
