@@ -1,7 +1,9 @@
 #include "driver/gpio.h"
 #include "initialize_board.h"
 
-void initialize_board(void) {
+using namespace ShiftRegisters;
+
+void ShiftRegisters::initialize_board(void) {
     gpio_reset_pin(GPIO_NUM_13);
     gpio_reset_pin(GPIO_NUM_14);
     gpio_reset_pin(GPIO_NUM_42);

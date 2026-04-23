@@ -9,10 +9,8 @@
 
 static const char *TAG = "main";
 
-
-
 extern "C" void app_main(void) {
-    display_string("HELLO!");
+    ShiftRegisters::display_string("HELLO!");
 }
 
 // while (1) {

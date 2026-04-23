@@ -8,9 +8,11 @@
 #include "esp_rom_sys.h"
 #include "esp_log.h"
 
+using namespace ShiftRegisters;
+
 static const char *TAG = "display_string";
 
-void display_character_set(uint8_t* characters, size_t num_characters) {
+void ShiftRegisters::display_character_set(uint8_t* characters, size_t num_characters) {
 
     int total_cells = 8;
 
@@ -71,7 +73,7 @@ void display_character_set(uint8_t* characters, size_t num_characters) {
 
 }
 
-void display_string(char* input) {
+void ShiftRegisters::display_string(char* input) {
 
     size_t num_characters = strlen(input);
     uint8_t characters[num_characters];
@@ -83,10 +85,10 @@ void display_string(char* input) {
     int i=0;
     while(1){
         if(i+8 > num_characters){
-            display_character_set(characters + i, num_characters - i);
+            ShiftRegisters::display_character_set(characters + i, num_characters - i);
             i = 0;
         } else {
-            display_character_set(characters + i, 8);
+            ShiftRegisters::display_character_set(characters + i, 8);
             i += 8;
         }
         // esp_rom_delay_us(1000000);
@@ -95,7 +97,7 @@ void display_string(char* input) {
 
         uint8_t zeros[] = {32, 32, 32, 32, 32, 32, 32, 32};
 
-        display_character_set(zeros, 8);
+        ShiftRegisters::display_character_set(zeros, 8);
 
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
