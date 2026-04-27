@@ -9,11 +9,6 @@ static uint8_t rx_buf[TINYUSB_CDC_RX_BUFSIZE + 1];
  * @brief Application Queue
  */
 static QueueHandle_t app_queue;
-typedef struct {
-    uint8_t buf[TINYUSB_CDC_RX_BUFSIZE + 1];     // Data buffer
-    size_t buf_len;                                     // Number of bytes received
-    uint8_t itf;                                        // Index of CDC device interface
-} app_message_t;
 
 /**
  * @brief CDC device RX callback

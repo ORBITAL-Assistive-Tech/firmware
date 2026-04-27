@@ -21,12 +21,6 @@ static const char *TAG = "main";
  * @brief Application Queue
  */
 static QueueHandle_t app_queue;
-typedef struct {
-    uint8_t buf[TINYUSB_CDC_RX_BUFSIZE + 1];     // Data buffer
-    size_t buf_len;                                     // Number of bytes received
-    uint8_t itf;                                        // Index of CDC device interface
-} app_message_t;
-
 
 extern "C" void app_main(void)
 {
@@ -38,14 +32,6 @@ extern "C" void app_main(void)
     ESP_LOGI(TAG, "USB initialization");
     const tinyusb_config_t tusb_cfg = TINYUSB_DEFAULT_CONFIG();
     ESP_ERROR_CHECK(tinyusb_driver_install(&tusb_cfg));
-
-    tinyusb_config_cdcacm_t acm_cfg = {
-        .cdc_port = TINYUSB_CDC_ACM_0,
-        .callback_rx = &tinyusb_cdc_rx_callback, // the first way to register a callback
-        .callback_rx_wanted_char = NULL,
-        .callback_line_state_changed = NULL,
-        .callback_line_coding_changed = NULL
-    };
 
     ESP_ERROR_CHECK(tinyusb_cdcacm_init(&acm_cfg));
     /* the second way to register a callback */
