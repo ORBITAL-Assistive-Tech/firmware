@@ -8,7 +8,7 @@ static uint8_t rx_buf[TINYUSB_CDC_RX_BUFSIZE + 1];
 /**
  * @brief Application Queue
  */
-static QueueHandle_t app_queue;
+extern QueueHandle_t app_queue;
 
 /**
  * @brief CDC device RX callback

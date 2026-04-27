@@ -20,7 +20,7 @@ static const char *TAG = "main";
 /**
  * @brief Application Queue
  */
-static QueueHandle_t app_queue;
+QueueHandle_t app_queue;
 
 extern "C" void app_main(void)
 {
