@@ -30,23 +30,30 @@ void ShiftRegisters::display_character_set(uint8_t* characters, size_t num_chara
 
     initialize_board();
 
+    // rclk off
+    gpio_set_level(GPIO_NUM_13, 0);
+
     for(int i=0; i<8; i++){
 
         uint8_t input = inputs[i];
-        // rclk off
-        gpio_set_level(GPIO_NUM_13, 0);
 
         for(int j=0; j<8; j++){
             // srclk off
             gpio_set_level(GPIO_NUM_47, 0);
+            // rclk off
+            gpio_set_level(GPIO_NUM_13, 0);
 
             // pass the jth bit into shift register
             gpio_set_level(GPIO_NUM_14, (input>>j) & 1);
+
+            // ESP_LOGI(TAG, "%d", (input>>j) & 1);
 
             esp_rom_delay_us(500);
 
             // srclk on
             gpio_set_level(GPIO_NUM_47, 1);
+            // rclk on
+            gpio_set_level(GPIO_NUM_13, 1);
 
             // delay
             esp_rom_delay_us(500);
@@ -56,26 +63,23 @@ void ShiftRegisters::display_character_set(uint8_t* characters, size_t num_chara
 
             // ESP_LOGI(TAG, "%d: %d", i*8+j, (input>>(i*8+j)) & 1);
         }
-
-        // rclk on
-        gpio_set_level(GPIO_NUM_13, 1);
-        // delay
-        esp_rom_delay_us(500);
-        
     }
-    // // rclk on
-    // gpio_set_level(GPIO_NUM_13, 1);
-    // // delay
-    // esp_rom_delay_us(500);
-    // // rclk off
-    // gpio_set_level(GPIO_NUM_13, 0);
-
+    
+    // rclk on
+    gpio_set_level(GPIO_NUM_13, 1);
+    // delay
+    esp_rom_delay_us(500);
+    // rclk off
+    gpio_set_level(GPIO_NUM_13, 0);
 
 }
 
 void ShiftRegisters::display_string(char* input) {
 
     size_t num_characters = strlen(input);
+
+    ESP_LOGI(TAG, "%d", num_characters);
+
     uint8_t characters[num_characters];
 
     for(int i=0; i<num_characters; i++){
@@ -86,19 +90,18 @@ void ShiftRegisters::display_string(char* input) {
     while(1){
         if(i+8 > num_characters){
             ShiftRegisters::display_character_set(characters + i, num_characters - i);
-            i = 0;
+            i += 8;
         } else {
             ShiftRegisters::display_character_set(characters + i, 8);
-            i += 8;
+            i = 0;
         }
-        // esp_rom_delay_us(1000000);
-        ESP_LOGI(TAG, "");
         vTaskDelay(pdMS_TO_TICKS(1000));
 
-        uint8_t zeros[] = {32, 32, 32, 32, 32, 32, 32, 32};
 
-        ShiftRegisters::display_character_set(zeros, 8);
+        // uint8_t zeros[] = {32, 32, 32, 32, 32, 32, 32, 32};
 
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        // ShiftRegisters::display_character_set(zeros, 8);
+
+        // vTaskDelay(pdMS_TO_TICKS(500));
     }
 }
