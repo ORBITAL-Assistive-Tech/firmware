@@ -1,4 +1,5 @@
-#include <stdint.h>
+#include <cstdint>
+#include <cstring>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "display_string.h"
@@ -12,18 +13,16 @@ using namespace ShiftRegisters;
 
 static const char *TAG = "display_string";
 
-void ShiftRegisters::display_character_set(uint8_t* characters, size_t num_characters) {
+void ShiftRegisters::display_character_set(std::uint8_t* characters, std::size_t num_characters) {
 
-    int total_cells = 8;
-
-    uint8_t inputs[total_cells];
+    std::uint8_t inputs[ShiftRegisters::total_cells];
 
     for(int i=0; i<num_characters; i++){
         inputs[i] = convert_character(characters[i]);
     }
 
-    if(num_characters<total_cells){
-        for(int i=num_characters; i<total_cells; i++){
+    if(num_characters<ShiftRegisters::total_cells){
+        for(int i=num_characters; i<ShiftRegisters::total_cells; i++){
             inputs[i] = 0b00000000;
         }
     }
@@ -35,7 +34,7 @@ void ShiftRegisters::display_character_set(uint8_t* characters, size_t num_chara
 
     for(int i=0; i<8; i++){
 
-        uint8_t input = inputs[i];
+        std::uint8_t input = inputs[i];
 
         for(int j=0; j<8; j++){
             // srclk off
@@ -45,8 +44,6 @@ void ShiftRegisters::display_character_set(uint8_t* characters, size_t num_chara
 
             // pass the jth bit into shift register
             gpio_set_level(GPIO_NUM_14, (input>>j) & 1);
-
-            // ESP_LOGI(TAG, "%d", (input>>j) & 1);
 
             esp_rom_delay_us(500);
 
@@ -58,10 +55,9 @@ void ShiftRegisters::display_character_set(uint8_t* characters, size_t num_chara
             // delay
             esp_rom_delay_us(500);
 
-            // data pin 0?
+            // SER (data in)
             gpio_set_level(GPIO_NUM_14, 0);
 
-            // ESP_LOGI(TAG, "%d: %d", i*8+j, (input>>(i*8+j)) & 1);
         }
     }
     
@@ -76,32 +72,27 @@ void ShiftRegisters::display_character_set(uint8_t* characters, size_t num_chara
 
 void ShiftRegisters::display_string(char* input) {
 
-    size_t num_characters = strlen(input);
+    std::size_t num_characters = std::strlen(input);
 
     ESP_LOGI(TAG, "%d", num_characters);
 
-    uint8_t characters[num_characters];
+    std::uint8_t characters[num_characters];
 
     for(int i=0; i<num_characters; i++){
-        characters[i] = (uint8_t)input[i];
+        characters[i] = static_cast<std::uint8_t>(input[i]);
     }
 
     int i=0;
-    while(1){
-        if(i+8 > num_characters){
+    while(1){ // display each character set until end of string
+
+        if(i+ShiftRegisters::total_cells > num_characters){ // TODO: FIX THIS
             ShiftRegisters::display_character_set(characters + i, num_characters - i);
-            i += 8;
+            i += ShiftRegisters::total_cells;
         } else {
-            ShiftRegisters::display_character_set(characters + i, 8);
-            i = 0;
+            ShiftRegisters::display_character_set(characters + i, ShiftRegisters::total_cells);
+            break;
         }
         vTaskDelay(pdMS_TO_TICKS(1000));
 
-
-        // uint8_t zeros[] = {32, 32, 32, 32, 32, 32, 32, 32};
-
-        // ShiftRegisters::display_character_set(zeros, 8);
-
-        // vTaskDelay(pdMS_TO_TICKS(500));
     }
 }

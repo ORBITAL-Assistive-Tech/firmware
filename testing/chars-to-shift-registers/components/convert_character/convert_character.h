@@ -1,7 +1,7 @@
-#include <stdint.h>
+#include <cstdint>
 
 namespace ShiftRegisters{
-    constexpr uint8_t conversion_table[] = {
+    constexpr std::uint8_t conversion_table[] = {
         0b00000000, 0b00011101, 0b00000010, 0b00001111, 0b00110101, 0b00100101, 0b00111101, 0b00001000,
         0b00111011, 0b00011111, 0b00100001, 0b00001101, 0b00000001, 0b00001001, 0b00000101, 0b00001100,
         0b00001011, 0b00010000, 0b00011000, 0b00010010, 0b00010011, 0b00010001, 0b00011010, 0b00011011,
@@ -12,5 +12,7 @@ namespace ShiftRegisters{
         0b00101101, 0b00101111, 0b00101011, 0b00010101, 0b00000000, 0b00110111, 0b00000110, 0b00000111
     };
 
-    uint8_t convert_character(uint8_t input);
+    std::uint8_t convert_character(std::uint8_t input);
+
+    void print_conversion(std::uint8_t input);
 }

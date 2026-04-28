@@ -1,26 +1,23 @@
-#include <stdint.h>
-#include <ctype.h>
+#include <cstdint>
+#include <cctype>
+#include <cstdio>
 #include "convert_character.h"
 
 #include "esp_log.h"
+
 static const char *TAG = "convert_character";
 
 using namespace ShiftRegisters;
 
-uint8_t ShiftRegisters::convert_character(uint8_t input) {
-
-    uint8_t converted_input = conversion_table[input-0x20];
-
-    // print converted character in binary
-    // for(int i=5; i>=0; i--){
-    //     printf("%d", (converted_input>>i) & 1);
-    // }
-
-    // printf("\n");
+std::uint8_t ShiftRegisters::convert_character(std::uint8_t input) {
+    return ShiftRegisters::conversion_table[std::toupper(input)-0x20];
+}
 
 
-
-    // ESP_LOGI(TAG, "%d", conversion_table[toupper(input)-32]);
-
-    return ShiftRegisters::conversion_table[toupper(input)-0x20];
+void ShiftRegisters::print_conversion(std::uint8_t input){
+    std::uint8_t converted_input = ShiftRegisters::convert_character(input);
+    for(int i=5; i>=0; i--){
+        ESP_LOGI(TAG, "%d", (converted_input>>i) & 1);
+    }
+    std::printf("\n");
 }
