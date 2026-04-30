@@ -1,4 +1,4 @@
-set(srcs "test_sd_card.c")
+set(srcs "sd_card_example_main_original.c")
 
 idf_component_register(SRCS ${srcs}
                        INCLUDE_DIRS "."
