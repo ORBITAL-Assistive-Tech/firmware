@@ -10,7 +10,7 @@
 #include "sdkconfig.h"
 
 // constexpr const char *TAG = "example";
-constexpr const uint8_t TINYUSB_CDC_RX_BUFSIZE = 512;
+constexpr uint16_t TINYUSB_CDC_RX_BUFSIZE = 512;
 typedef struct {
     uint8_t buf[TINYUSB_CDC_RX_BUFSIZE + 1];     // Data buffer
     size_t buf_len;                                     // Number of bytes received
