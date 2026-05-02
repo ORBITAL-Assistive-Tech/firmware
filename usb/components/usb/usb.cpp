@@ -8,7 +8,24 @@ static uint8_t rx_buf[TINYUSB_CDC_RX_BUFSIZE + 1];
 /**
  * @brief Application Queue
  */
-extern QueueHandle_t app_queue;
+QueueHandle_t AppQueueHandler::app_queue = xQueueCreate(5, sizeof(app_message_t));
+AppQueueHandler* AppQueueHandler::getInstance() {
+    if (instancePtr == nullptr) {
+        instancePtr = new AppQueueHandler();
+        AppQueueHandler::app_queue = xQueueCreate(5, sizeof(app_message_t));
+    }
+    return instancePtr;
+}
+QueueHandle_t AppQueueHandler::getQueue() {
+    AppQueueHandler* instance = AppQueueHandler::getInstance();
+    ESP_LOGI(TAG, "USB initialization");
+    return instance->app_queue;
+}
+
+AppQueueHandler* AppQueueHandler::instancePtr = nullptr;
+
+AppQueueHandler* handler = AppQueueHandler::getInstance();
+QueueHandle_t app_queue = handler->getQueue();
 
 /**
  * @brief CDC device RX callback

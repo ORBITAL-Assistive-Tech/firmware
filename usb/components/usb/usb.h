@@ -20,10 +20,19 @@ typedef struct {
 
 void tinyusb_cdc_rx_callback(int itf, cdcacm_event_t *event);
 void tinyusb_cdc_line_state_changed_callback(int itf, cdcacm_event_t *event);
-constexpr const tinyusb_config_cdcacm_t acm_cfg = {
-    .cdc_port = TINYUSB_CDC_ACM_0,
-    .callback_rx = &tinyusb_cdc_rx_callback, // the first way to register a callback
-    .callback_rx_wanted_char = NULL,
-    .callback_line_state_changed = NULL,
-    .callback_line_coding_changed = NULL
+
+class AppQueueHandler {
+    private:
+        static QueueHandle_t app_queue;
+        static AppQueueHandler* instancePtr;
+
+        AppQueueHandler() {}
+    public:
+        // Deleting the copy constructor to prevent copies
+        AppQueueHandler(const AppQueueHandler& obj) = delete;
+
+        static AppQueueHandler* getInstance();
+        static QueueHandle_t getQueue();
 };
+
+extern AppQueueHandler* handler;
