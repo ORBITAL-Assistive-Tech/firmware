@@ -4,15 +4,11 @@
  * SPDX-License-Identifier: Unlicense OR CC0-1.0
  */
 
-#include <stdint.h>
+#include <cstdint>
+#include <string>
 #include "esp_log.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/queue.h"
-#include "tinyusb.h"
 #include "tinyusb_default_config.h"
 #include "tinyusb_cdc_acm.h"
-#include "sdkconfig.h"
 #include "usb.h"
 
 static const char *TAG = "main";

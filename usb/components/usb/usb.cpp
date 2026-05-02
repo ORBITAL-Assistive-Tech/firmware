@@ -1,5 +1,5 @@
 #include "usb.h"
-
+#include "esp_log.h"
 
 static const char *TAG = "usb";
 
@@ -49,7 +49,7 @@ void tinyusb_cdc_rx_callback(int itf, cdcacm_event_t *event)
     size_t rx_size = 0;
 
     /* read */
-    esp_err_t ret = tinyusb_cdcacm_read((tinyusb_cdcacm_itf_t) itf, rx_buf, TINYUSB_CDC_RX_BUFSIZE, &rx_size);
+    esp_err_t ret = tinyusb_cdcacm_read(static_cast<tinyusb_cdcacm_itf_t>(itf), rx_buf, TINYUSB_CDC_RX_BUFSIZE, &rx_size);
     if (ret == ESP_OK) {
 
         app_message_t tx_msg = {
@@ -105,8 +105,8 @@ std::string* check_data_received(QueueHandle_t queue) {
             // ESP_LOG_BUFFER_HEXDUMP(TAG, msg.buf, msg.buf_len, ESP_LOG_INFO);
 
             /* write back */
-            tinyusb_cdcacm_write_queue((tinyusb_cdcacm_itf_t) msg.itf, msg.buf, msg.buf_len);
-            esp_err_t err = tinyusb_cdcacm_write_flush((tinyusb_cdcacm_itf_t)msg.itf, 0);
+            tinyusb_cdcacm_write_queue(static_cast<tinyusb_cdcacm_itf_t>(msg.itf), msg.buf, msg.buf_len);
+            esp_err_t err = tinyusb_cdcacm_write_flush(static_cast<tinyusb_cdcacm_itf_t>(msg.itf), 0);
             if (err != ESP_OK) {
                 ESP_LOGE(TAG, "CDC ACM write flush error: %s", esp_err_to_name(err));
             }

@@ -1,13 +1,8 @@
 #pragma once
-#include <stdint.h>
-#include "esp_log.h"
+#include <cstdint>
+#include <string>
 #include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/queue.h"
-#include "tinyusb.h"
-#include "tinyusb_default_config.h"
 #include "tinyusb_cdc_acm.h"
-#include "sdkconfig.h"
 
 // constexpr const char *TAG = "example";
 constexpr size_t TINYUSB_CDC_RX_BUFSIZE = 1024;
