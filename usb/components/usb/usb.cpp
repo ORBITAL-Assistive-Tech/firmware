@@ -9,6 +9,10 @@ static uint8_t rx_buf[TINYUSB_CDC_RX_BUFSIZE + 1];
  * @brief Application Queue
  */
 QueueHandle_t AppQueueHandler::app_queue = xQueueCreate(5, sizeof(app_message_t));
+
+/**
+ * @brief Get the AppQueueHandler instance
+ */
 AppQueueHandler* AppQueueHandler::getInstance() {
     if (instancePtr == nullptr) {
         instancePtr = new AppQueueHandler();
@@ -16,6 +20,10 @@ AppQueueHandler* AppQueueHandler::getInstance() {
     }
     return instancePtr;
 }
+
+/**
+ * @brief Ge the queue attached to the handler.
+ */
 QueueHandle_t AppQueueHandler::getQueue() {
     AppQueueHandler* instance = AppQueueHandler::getInstance();
     ESP_LOGI(TAG, "USB initialization");
