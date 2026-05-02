@@ -70,3 +70,29 @@ void tinyusb_cdc_line_state_changed_callback(int itf, cdcacm_event_t *event)
     int rts = event->line_state_changed_data.rts;
     ESP_LOGI(TAG, "Line state changed on channel %d: DTR:%d, RTS:%d", itf, dtr, rts);
 }
+
+/**
+ * @brief check a queue for data
+ * 
+ * Logs received data from USB if data has been received.
+ * 
+ * @param queue Queue to check
+ */
+void check_data_received(QueueHandle_t queue) {
+    app_message_t msg;
+    if (xQueueReceive(queue, &msg, portMAX_DELAY)) {
+        if (msg.buf_len) {
+
+            /* Print received data*/
+            ESP_LOGI(TAG, "Data from channel %d:", msg.itf);
+            ESP_LOG_BUFFER_HEXDUMP(TAG, msg.buf, msg.buf_len, ESP_LOG_INFO);
+
+            /* write back */
+            tinyusb_cdcacm_write_queue((tinyusb_cdcacm_itf_t) msg.itf, msg.buf, msg.buf_len);
+            esp_err_t err = tinyusb_cdcacm_write_flush((tinyusb_cdcacm_itf_t)msg.itf, 0);
+            if (err != ESP_OK) {
+                ESP_LOGE(TAG, "CDC ACM write flush error: %s", esp_err_to_name(err));
+            }
+        }
+    }
+}

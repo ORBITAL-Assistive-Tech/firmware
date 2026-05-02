@@ -28,7 +28,6 @@ extern "C" void app_main(void)
     // Create FreeRTOS primitives
     app_queue_1 = handler_ref->getQueue();
     assert(app_queue_1);
-    app_message_t msg;
 
     ESP_LOGI(TAG, "USB initialization");
     const tinyusb_config_t tusb_cfg = TINYUSB_DEFAULT_CONFIG();
@@ -51,20 +50,6 @@ extern "C" void app_main(void)
 
     ESP_LOGI(TAG, "USB initialization DONE");
     while (1) {
-        if (xQueueReceive(app_queue_1, &msg, portMAX_DELAY)) {
-            if (msg.buf_len) {
-
-                /* Print received data*/
-                ESP_LOGI(TAG, "Data from channel %d:", msg.itf);
-                ESP_LOG_BUFFER_HEXDUMP(TAG, msg.buf, msg.buf_len, ESP_LOG_INFO);
-
-                /* write back */
-                tinyusb_cdcacm_write_queue((tinyusb_cdcacm_itf_t) msg.itf, msg.buf, msg.buf_len);
-                esp_err_t err = tinyusb_cdcacm_write_flush((tinyusb_cdcacm_itf_t)msg.itf, 0);
-                if (err != ESP_OK) {
-                    ESP_LOGE(TAG, "CDC ACM write flush error: %s", esp_err_to_name(err));
-                }
-            }
-        }
+        check_data_received(app_queue_1);
     }
 }
