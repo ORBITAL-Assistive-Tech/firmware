@@ -86,14 +86,23 @@ void tinyusb_cdc_line_state_changed_callback(int itf, cdcacm_event_t *event)
  * 
  * @param queue Queue to check
  */
-void check_data_received(QueueHandle_t queue) {
+std::string* check_data_received(QueueHandle_t queue) {
     app_message_t msg;
     if (xQueueReceive(queue, &msg, portMAX_DELAY)) {
         if (msg.buf_len) {
 
             /* Print received data*/
             ESP_LOGI(TAG, "Data from channel %d:", msg.itf);
-            ESP_LOG_BUFFER_HEXDUMP(TAG, msg.buf, msg.buf_len, ESP_LOG_INFO);
+            ESP_LOGI(TAG, "%d", msg.buf);
+            char arr[msg.buf_len + 1];
+            for (size_t i = 0; i < msg.buf_len; i++) {
+                arr[i] = (char) msg.buf[i];
+            }
+            arr[msg.buf_len] = '\0';
+            
+            std::string* received_string = new std::string(arr);
+
+            // ESP_LOG_BUFFER_HEXDUMP(TAG, msg.buf, msg.buf_len, ESP_LOG_INFO);
 
             /* write back */
             tinyusb_cdcacm_write_queue((tinyusb_cdcacm_itf_t) msg.itf, msg.buf, msg.buf_len);
@@ -101,6 +110,7 @@ void check_data_received(QueueHandle_t queue) {
             if (err != ESP_OK) {
                 ESP_LOGE(TAG, "CDC ACM write flush error: %s", esp_err_to_name(err));
             }
+            return received_string;
         }
     }
 }

@@ -50,6 +50,7 @@ extern "C" void app_main(void)
 
     ESP_LOGI(TAG, "USB initialization DONE");
     while (1) {
-        check_data_received(app_queue_1);
+        std::string* str = check_data_received(app_queue_1);
+        ESP_LOGI(TAG, "%s", str->c_str());
     }
 }
