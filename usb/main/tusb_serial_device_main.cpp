@@ -16,7 +16,7 @@ static const char *TAG = "main";
 /**
  * @brief Application Queue
  */
-AppQueueHandler* handler_ref = AppQueueHandler::getInstance();
+usb::AppQueueHandler* handler_ref = usb::AppQueueHandler::getInstance();
 QueueHandle_t app_queue_1;
 
 extern "C" void app_main(void)
@@ -31,7 +31,7 @@ extern "C" void app_main(void)
 
     tinyusb_config_cdcacm_t acm_cfg = {
         .cdc_port = TINYUSB_CDC_ACM_0,
-        .callback_rx = &tinyusb_cdc_rx_callback, // the first way to register a callback
+        .callback_rx = &usb::tinyusb_cdc_rx_callback, // the first way to register a callback
         .callback_rx_wanted_char = NULL,
         .callback_line_state_changed = NULL,
         .callback_line_coding_changed = NULL
@@ -42,11 +42,11 @@ extern "C" void app_main(void)
     ESP_ERROR_CHECK(tinyusb_cdcacm_register_callback(
                         TINYUSB_CDC_ACM_0,
                         CDC_EVENT_LINE_STATE_CHANGED,
-                        &tinyusb_cdc_line_state_changed_callback));
+                        &usb::tinyusb_cdc_line_state_changed_callback));
 
     ESP_LOGI(TAG, "USB initialization DONE");
     while (1) {
-        std::string* str = check_data_received(app_queue_1);
+        std::string* str = usb::check_data_received(app_queue_1);
         ESP_LOGI(TAG, "%s", str->c_str());
     }
 }
